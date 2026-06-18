@@ -16,6 +16,8 @@ local UserInputService = cloneref(game:GetService("UserInputService"))
 local Workspace = cloneref(workspace)
 local Players = cloneref(game:GetService("Players"))
 local Lighting = cloneref(game:GetService("Lighting"))
+local RemoteEventSpy = require(script.Parent:WaitForChild("RemoteEventSpy"))
+RemoteEventSpy:StartMonitoring()
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
@@ -670,6 +672,45 @@ local Window = WindUI:CreateWindow({
 	},
 })
 
+-- Tab Developer
+local SpyTab = Window:Tab({
+	Title = "Remote Spy",
+	Icon = "solar:bug-bold",
+})
+
+SpyTab:Section({
+	Title = "Live Remote Event Monitor",
+})
+
+local RefreshButton = SpyTab:Button({
+	Title = "Refresh Data",
+	Callback = function()
+		local spyData = RemoteEventSpy:GetFormattedData()
+		print("=== REMOTE EVENT SPY ===")
+		for _, remote in ipairs(spyData) do
+			print("Remote: " .. remote.Name)
+			print("Calls: " .. remote.CallCount)
+			if remote.LastCall then
+				print("Last Call Arguments:")
+				for i, argStr in ipairs(remote.LastCall.ArgStrings) do
+					print("  [" .. i .. "] " .. argStr)
+				end
+			end
+			print("---")
+		end
+	end,
+})
+
+local ClearButton = SpyTab:Button({
+	Title = "Clear History",
+	Callback = function()
+		RemoteEventSpy:ClearHistory()
+		WindUI:Notify({
+			Title = "Cleared",
+			Content = "Remote event history cleared",
+		})
+	end,
+})
 -- Tab 1: VIP
 local TabVIP = Window:Tab({ Title = "VIP", Icon = "solar:crown-bold" })
 TabVIP:Section({ Title = "Automatic Features" })
